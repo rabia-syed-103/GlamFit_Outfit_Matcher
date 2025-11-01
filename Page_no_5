@@ -1,1 +1,171 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ProfilePage(),
+    );
+  }
+}
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  // Example user data
+  final String fullName = "Rabia Syed";
+  final String userName = "rabia123";
+  final String email = "rabia@gmail.com";
+  final String password = "********";
+
+  File? _imageFile;
+
+  // Image picker instance
+  final ImagePicker _picker = ImagePicker();
+
+  // Pick image from gallery
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _imageFile = File(picked.path);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0C473E),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Back button + Title
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {},
+                    ),
+                    const Spacer(),
+                    const Text(
+                      'Profile',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(flex: 2),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Profile Picture (editable)
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.white,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(_imageFile!)
+                          : const NetworkImage(
+                          "https://www.w3schools.com/howto/img_avatar.png")
+                      as ImageProvider,
+                    ),
+                    Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.edit, size: 18, color: Color(0xFF0C473E)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+                const Text(
+                  "E d i t",
+                  style: TextStyle(color: Colors.white, letterSpacing: 3),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Read-only data fields
+                _buildReadOnlyField("Name", fullName),
+                const SizedBox(height: 15),
+                _buildReadOnlyField("User Name", userName),
+                const SizedBox(height: 15),
+                _buildReadOnlyField("Email Or Phone Number", email),
+                const SizedBox(height: 15),
+                _buildReadOnlyField("Password", password, obscureText: true),
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // Open password change screen
+                    },
+                    child: const Text(
+                      "Change Password?",
+                      style: TextStyle(
+                        color: Colors.white,
+                        decoration: TextDecoration.underline,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper widget for read-only fields
+  static Widget _buildReadOnlyField(String label, String value,
+      {bool obscureText = false}) {
+    return TextField(
+      readOnly: true,
+      obscureText: obscureText,
+      controller: TextEditingController(text: value),
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.white38),
+        ),
+      ),
+    );
+  }
+}
