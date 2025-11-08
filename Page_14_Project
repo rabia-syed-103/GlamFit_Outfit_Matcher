@@ -1,0 +1,215 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Suggested Outfits',
+      home: const SuggestedOutfitsPage(),
+    );
+  }
+}
+
+class SuggestedOutfitsPage extends StatelessWidget {
+  const SuggestedOutfitsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const Color mainColor = Color(0xFF063831);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Top Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, size: 18),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(width: 100),
+                  const Expanded(
+                    child: Text(
+                      "Suggested Outfits",
+                      textAlign: TextAlign.center,
+
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF3B3B3B),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 30), // to balance spacing
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Outfit Image Boxes
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildOutfitBox(),
+                const SizedBox(width: 16),
+                _buildOutfitBox(),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            // Green Info Section
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12), // ✅ side space added
+                decoration: const BoxDecoration(
+                  color: Color(0xFF063831),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                padding:
+                const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        // Suggested Top
+                        const SizedBox(height: 35),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Suggested Top:  ",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Blue Shirt",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Suggested Bottom
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Suggested Bottom:  ",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Black Pants",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Save Outfit Button
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.favorite_border, color: Colors.black),
+                            label: const Text(
+                              "Save Outfit",
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+
+                    ),
+
+                    // ✅ Next Button at Bottom
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Your Next click action here
+                        },
+                        child: const Text(
+                          "Next >",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Outfit Box Placeholder
+  static Widget _buildOutfitBox() {
+    return Container(
+      width: 170,
+      height: 300,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black),
+      ),
+
+    );
+  }
+}
