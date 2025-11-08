@@ -1,0 +1,415 @@
+//Add Dependecy 
+//dependencies:
+//  image_picker: ^1.1.2
+//  flutter_colorpicker: ^1.0.3
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+void main() {
+  runApp(const MakeOutfitApp());
+}
+
+class MakeOutfitApp extends StatelessWidget {
+  const MakeOutfitApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MakeOutfitScreen(),
+    );
+  }
+}
+
+class MakeOutfitScreen extends StatefulWidget {
+  const MakeOutfitScreen({super.key});
+
+  @override
+  State<MakeOutfitScreen> createState() => _MakeOutfitScreenState();
+}
+
+class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
+  final Color mainColor = const Color(0xFF063831);
+  final picker = ImagePicker();
+  File? imageFile;
+
+  bool isTop = false;
+  bool isBottom = false;
+  bool isEastern = false;
+  bool isWestern = false;
+
+  Color selectedColor = Colors.transparent;
+
+  final List<Color> colors = [
+    
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.blue,
+    Colors.teal,
+    Colors.cyan,
+    Colors.green,
+    Colors.amber,
+    Colors.orange,
+    Colors.black,
+    Colors.white,
+  ];
+
+  Future<void> openCamera() async {
+    final picked = await picker.pickImage(source: ImageSource.camera);
+    if (picked != null) {
+      setState(() {
+        imageFile = File(picked.path);
+      });
+    }
+  }
+
+  void openColorPicker() {
+    Color tempColor = selectedColor;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Pick a Color'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: tempColor,
+              onColorChanged: (color) => tempColor = color,
+              showLabel: true,
+              pickerAreaHeightPercent: 0.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('CANCEL'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: const Text('SELECT'),
+              onPressed: () {
+                setState(() => selectedColor = tempColor);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: height),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 8),
+
+                  // Title Row
+                  Row(
+                    children: [
+                      const Icon(Icons.arrow_back),
+                      const SizedBox(width: 170),
+                      Text(
+                        "MAKE OUTFIT",
+                        style: TextStyle(
+                          color: mainColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4)
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Take Photo & Upload Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _iconButton(
+                        icon: Icons.camera_alt,
+                        label: 'Take Photo',
+                        onTap: openCamera,
+                        color: mainColor,
+                      ),
+                      _iconButton(
+                        icon: Icons.image,
+                        label: 'Upload Image',
+                        onTap: () {},
+                        color: mainColor,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Preview Image
+                  Container(
+                    width: width * 0.55,
+                    height: height * 0.22,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: mainColor, width: 2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: imageFile == null
+                        ? const Center(child: Text('Preview Image'))
+                        : ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(imageFile!, fit: BoxFit.cover),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Main Panel
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: mainColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Select Type:',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Checkbox grid (2x2)
+                        Column(
+                          children: [
+                            // Top / Bottom row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _checkBox("Top", isTop, (v) {
+                                    setState(() {
+                                      if (v == true) {
+                                        isTop = true;
+                                        isBottom = false;
+                                      } else {
+                                        isTop = false;
+                                      }
+                                    });
+                                  }),
+                                ),
+                                Expanded(
+                                  child: _checkBox("Bottom", isBottom, (v) {
+                                    setState(() {
+                                      if (v == true) {
+                                        isBottom = true;
+                                        isTop = false;
+                                      } else {
+                                        isBottom = false;
+                                      }
+                                    });
+                                  }),
+                                ),
+                              ],
+                            ),
+
+                            // Eastern / Western row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _checkBox("Eastern", isEastern, (v) {
+                                    setState(() {
+                                      if (v == true) {
+                                        isEastern = true;
+                                        isWestern = false;
+                                      } else {
+                                        isEastern = false;
+                                      }
+                                    });
+                                  }),
+                                ),
+                                Expanded(
+                                  child: _checkBox("Western", isWestern, (v) {
+                                    setState(() {
+                                      if (v == true) {
+                                        isWestern = true;
+                                        isEastern = false;
+                                      } else {
+                                        isWestern = false;
+                                      }
+                                    });
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Pick Color:',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Smaller color circles in 2 rows
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: colors.map((c) {
+                            return GestureDetector(
+                              onTap: () => setState(() => selectedColor = c),
+                              child: Container(
+                                width: 22,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  color: c,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selectedColor == c
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Custom Color (eyedropper simulation)
+                        GestureDetector(
+                          onTap: openColorPicker,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Preview Circle
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: selectedColor == Colors.transparent
+                                      ? Colors.white.withOpacity(0.5) // transparent white shade
+                                      : selectedColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.colorize, color: Colors.white),
+                              const SizedBox(width: 4),
+                              const Text(
+                                'Custom Color',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _button(
+                              'Next',
+                              Colors.white,
+                              mainColor,
+                              enabled: (isTop || isBottom) && (isEastern || isWestern),
+                            ),
+                            _button('CANCEL', Colors.white, mainColor),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _iconButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: mainColor,
+            size: MediaQuery.of(context).size.width * 0.2,
+          ),
+          const SizedBox(height: 8),
+          Text(label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _checkBox(String label, bool value, ValueChanged<bool?> onChanged) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          checkColor: Colors.white,
+          activeColor: Colors.tealAccent,
+          side: const BorderSide(color: Colors.white),
+        ),
+        Text(label,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _button(String text, Color bgColor, Color textColor, {bool enabled = true}) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: enabled ? bgColor : const Color(0xFF666666), // disabled color
+        foregroundColor: enabled ? textColor : Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+          side: BorderSide(color: textColor),
+        ),
+      ),
+      onPressed: enabled ? () {
+        // Your Next button action
+      } : null,
+      child: Text(text, style: const TextStyle(fontSize: 16)),
+    );
+  }
+}
