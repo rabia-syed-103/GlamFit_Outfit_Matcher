@@ -43,7 +43,7 @@ class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
   Color selectedColor = Colors.transparent;
 
   final List<Color> colors = [
-    
+
     Colors.pink,
     Colors.purple,
     Colors.deepPurple,
@@ -338,8 +338,9 @@ class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
                               Colors.white,
                               mainColor,
                               enabled: (isTop || isBottom) && (isEastern || isWestern),
+                              icon:Icons.arrow_forward
                             ),
-                            _button('CANCEL', Colors.white, mainColor),
+                            _button('CANCEL', Colors.white, mainColor,icon:Icons.close),
                           ],
                         ),
                       ],
@@ -395,7 +396,8 @@ class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
     );
   }
 
-  Widget _button(String text, Color bgColor, Color textColor, {bool enabled = true}) {
+  Widget _button(String text,Color bgColor,Color textColor, {bool enabled = true,     IconData? icon, // optional icon parameter
+      }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: enabled ? bgColor : const Color(0xFF666666), // disabled color
@@ -406,10 +408,23 @@ class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
           side: BorderSide(color: textColor),
         ),
       ),
-      onPressed: enabled ? () {
+      onPressed: enabled
+          ? () {
         // Your Next button action
-      } : null,
-      child: Text(text, style: const TextStyle(fontSize: 16)),
+      }
+          : null,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(text, style: const TextStyle(fontSize: 16)),
+          if (icon != null) ...[
+            const SizedBox(width: 8),
+            Icon(icon, size: 18),
+          ],
+        ],
+      ),
     );
   }
+
 }
