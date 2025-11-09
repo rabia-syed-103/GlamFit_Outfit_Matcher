@@ -1,0 +1,425 @@
+import 'dart:math';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+// Use this color to closely match the dark-green in the screenshot.
+const Color _panelGreen = Color(0xFF00332D);
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Make Outfit',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: false),
+      home: const MakeOutfitScreen(),
+    );
+  }
+}
+
+class MakeOutfitScreen extends StatefulWidget {
+  const MakeOutfitScreen({super.key});
+
+  @override
+  State<MakeOutfitScreen> createState() => _MakeOutfitScreenState();
+}
+
+class _MakeOutfitScreenState extends State<MakeOutfitScreen> {
+  bool _saved = false;
+  final Random _rand = Random();
+
+  // Simple lists to randomize for "Retry"
+  final List<String> _tops = [
+    'Blue Shirt',
+    'White T-Shirt',
+    'Red Hoodie',
+    'Striped Polo',
+    'Green Blouse',
+  ];
+  final List<String> _bottoms = [
+    'Black Pants',
+    'Jeans',
+    'Grey Joggers',
+    'Khaki Shorts',
+    'Black Skirt',
+  ];
+
+  String _currentTop = 'Blue Shirt';
+  String _currentBottom = 'Black Pants';
+
+  void _toggleSave() {
+    setState(() {
+      _saved = !_saved;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_saved ? 'Outfit saved' : 'Save removed'),
+        duration: const Duration(milliseconds: 800),
+      ),
+    );
+  }
+
+  void _retry() {
+    setState(() {
+      // ensure a change by picking different item if possible
+      String nextTop = _tops[_rand.nextInt(_tops.length)];
+      while (nextTop == _currentTop && _tops.length > 1) {
+        nextTop = _tops[_rand.nextInt(_tops.length)];
+      }
+      String nextBottom = _bottoms[_rand.nextInt(_bottoms.length)];
+      while (nextBottom == _currentBottom && _bottoms.length > 1) {
+        nextBottom = _bottoms[_rand.nextInt(_bottoms.length)];
+      }
+      _currentTop = nextTop;
+      _currentBottom = nextBottom;
+      _saved = false; // retry resets saved state
+    });
+  }
+
+  void _completeOutfit() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CompleteOutfitPage(
+          top: _currentTop,
+          bottom: _currentBottom,
+          saved: _saved,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use SafeArea + Stack to recreate the look where the bottom panel covers lower area
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Main Column for header and images
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // AppBar-style Row (matches screenshot)
+                Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
+                        onPressed: () {
+                          // pop if possible, otherwise show info
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Back (no previous route)'),
+                                  duration: Duration(milliseconds: 700)),
+                            );
+                          }
+                        },
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const Spacer(),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 34.0),
+                        child: Text(
+                          'Make Outfit',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Two tall image placeholders aligned like screenshot
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Expanded(child: _ImagePlaceholder()),
+                      SizedBox(width: 16),
+                      Expanded(child: _ImagePlaceholder()),
+                    ],
+                  ),
+                ),
+
+                // Spacer to allow bottom panel to overlap as in screenshot
+                const SizedBox(height: 12),
+              ],
+            ),
+
+            // Bottom panel occupying roughly lower half - mirrored to screenshot
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                // height tuned to match screenshot proportions
+                height: MediaQuery.of(context).size.height * 0.48,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: _panelGreen,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18.0, vertical: 18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Suggestions text
+                      Text(
+                        'Suggested Top:  $_currentTop',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Suggested Bottom:  $_currentBottom',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // Buttons row - centered as screenshot
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Save outfit pill button
+                          _PillButton(
+                            onPressed: _toggleSave,
+                            icon: _saved
+                                ? Icons.favorite // filled when saved
+                                : Icons.favorite_border,
+                            label: 'Save Outfit',
+                            backgroundColor: Colors.white,
+                            iconColor: _saved ? Colors.red : Colors.black,
+                            textColor: Colors.black,
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          // Retry pill button
+                          _PillButton(
+                            onPressed: _retry,
+                            icon: Icons.refresh,
+                            label: 'Retry',
+                            backgroundColor: Colors.white,
+                            iconColor: Colors.black,
+                            textColor: Colors.black,
+                          ),
+                        ],
+                      ),
+
+                      // Spacer pushes Complete button to bottom-ish inside panel
+                      const Spacer(),
+
+                      // "Complete Outfit >" centered at bottom of panel (lighter text)
+                      Center(
+                        child: TextButton(
+                          onPressed: _completeOutfit,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 22, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Complete Outfit  >',
+                            style: TextStyle(
+                              color: Color(0xFFBFD1CB), // lighter tint
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A white pill-shaped button with icon and text (used for Save / Retry)
+class _PillButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String label;
+  final Color backgroundColor;
+  final Color iconColor;
+  final Color textColor;
+
+  const _PillButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    required this.backgroundColor,
+    required this.iconColor,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: iconColor, size: 18),
+      label: Text(
+        label,
+        style: TextStyle(
+            color: textColor, fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+    );
+  }
+}
+
+/// The tall rectangle with an "X" inside (to match screenshot placeholders)
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 2 / 3.2, // tall rectangle like screenshot
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black, width: 1.6),
+        ),
+        child: const CustomPaint(
+          painter: _CrossPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+/// Draws the diagonal X (and a light center cross) similar to screenshot
+class _CrossPainter extends CustomPainter {
+  const _CrossPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint stroke = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+
+    // diagonals
+    canvas.drawLine(Offset(0, 0), Offset(size.width, size.height), stroke);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), stroke);
+
+    // vertical center line and horizontal center line a bit lighter (matches screenshot)
+    final Paint light = Paint()
+      ..color = Colors.black.withOpacity(0.5)
+      ..strokeWidth = 1.0;
+    canvas.drawLine(Offset(size.width / 2, 0),
+        Offset(size.width / 2, size.height), light);
+    canvas.drawLine(Offset(0, size.height / 2),
+        Offset(size.width, size.height / 2), light);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Simple page after pressing "Complete Outfit"
+class CompleteOutfitPage extends StatelessWidget {
+  final String top;
+  final String bottom;
+  final bool saved;
+
+  const CompleteOutfitPage({
+    required this.top,
+    required this.bottom,
+    required this.saved,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Outfit Summary'),
+        backgroundColor: _panelGreen,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Text('Top: $top',
+                style:
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text('Bottom: $bottom',
+                style:
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Back'),
+                  style:
+                  ElevatedButton.styleFrom(backgroundColor: _panelGreen),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Outfit completed!'),
+                        duration: Duration(milliseconds: 900)));
+                    Navigator.of(context).pop();
+                  },
+                  icon: Icon(saved ? Icons.favorite : Icons.favorite_border),
+                  label: const Text('Done'),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
