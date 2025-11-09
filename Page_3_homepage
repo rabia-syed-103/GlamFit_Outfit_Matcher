@@ -1,0 +1,318 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Outfit App',
+      theme: ThemeData(fontFamily: 'Poppins'),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: Drawer(
+        backgroundColor: const Color(0xFF0D4D46),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Color(0xFF0D4D46)),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            _drawerTile(context, Icons.home, 'Home', const HomePage()),
+            _drawerTile(context, Icons.checkroom, 'Wardrobe', const WardrobePage()),
+            _drawerTile(context, Icons.style, 'Suggested Outfits', const SuggestedOutfitsPage()),
+          ],
+        ),
+      ),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Padding(
+          padding: EdgeInsets.only(top: 6.0),
+          child: Text(
+            'Home Page',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        leading: Builder(
+          builder: (context) => Padding(
+            padding: const EdgeInsets.only(left: 10, top: 8),
+            child: IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 14, top: 8),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child:  Center(
+                  child: Transform.translate(
+                    offset: Offset(0, 1.2), // slight adjustment for perfect centering
+                    child: Icon(
+                      Icons.person_outline,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF053B36),
+              Color(0xFF0D4D46),
+              Color(0xFF14695C),
+              Color(0xFF1C8676),
+            ],
+            stops: [0.0, 0.35, 0.7, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 60),
+
+                // Make Outfit & Outfits
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _leftAlignedTextButton(
+                      context,
+                      title: "Make Outfit",
+                      icon: Icons.add_circle_outline,
+                      page: const MakeOutfitPage(),
+                    ),
+                    const SizedBox(height: 25),
+                    _leftAlignedTextButton(
+                      context,
+                      title: "Outfits",
+                      icon: Icons.checkroom_outlined,
+                      page: const OutfitsPage(),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 50),
+
+                // Quick Navigation Label
+                Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  child: const Text(
+                    "Quick Navigation:",
+                    style: TextStyle(
+                      color: Color(0xFF0D4D46),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Nav Buttons (dark green with white outlines)
+                _filledNavButton(
+                  context,
+                  title: "Home",
+                  icon: Icons.home,
+                  page: const HomePage(),
+                ),
+                const SizedBox(height: 20),
+                _filledNavButton(
+                  context,
+                  title: "Wardrobe",
+                  icon: Icons.checkroom,
+                  page: const WardrobePage(),
+                ),
+                const SizedBox(height: 20),
+                _filledNavButton(
+                  context,
+                  title: "Suggested Outfits",
+                  icon: Icons.style,
+                  page: const SuggestedOutfitsPage(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Drawer Tile
+  static Widget _drawerTile(BuildContext context, IconData icon, String text, Widget page) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(text, style: const TextStyle(color: Colors.white)),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+      },
+    );
+  }
+
+  // Left aligned text button (Make Outfit / Outfits)
+  Widget _leftAlignedTextButton(BuildContext context,
+      {required String title, required IconData icon, required Widget page}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => page)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(icon, color: Colors.white, size: 24),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Filled Nav Buttons (dark green with white outline)
+  static Widget _filledNavButton(BuildContext context,
+      {required String title, required IconData icon, required Widget page}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => page)),
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D4D46),
+          borderRadius: BorderRadius.circular(35),
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.5,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Icon(icon, color: Colors.white, size: 22),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Dummy Pages for Navigation
+class MakeOutfitPage extends StatelessWidget {
+  const MakeOutfitPage({super.key});
+  @override
+  Widget build(BuildContext context) => _simplePage(context, 'Make Outfit Page');
+}
+
+class OutfitsPage extends StatelessWidget {
+  const OutfitsPage({super.key});
+  @override
+  Widget build(BuildContext context) => _simplePage(context, 'Outfits Page');
+}
+
+class WardrobePage extends StatelessWidget {
+  const WardrobePage({super.key});
+  @override
+  Widget build(BuildContext context) => _simplePage(context, 'Wardrobe Page');
+}
+
+class SuggestedOutfitsPage extends StatelessWidget {
+  const SuggestedOutfitsPage({super.key});
+  @override
+  Widget build(BuildContext context) => _simplePage(context, 'Suggested Outfits Page');
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+  @override
+  Widget build(BuildContext context) => _simplePage(context, 'Profile Page');
+}
+
+// Simple page template
+Widget _simplePage(BuildContext context, String title) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: const Color(0xFF0D4D46),
+      title: Text(title),
+      centerTitle: true,
+    ),
+    body: Center(
+      child: Text(
+        'This is the $title',
+        style: const TextStyle(fontSize: 20, color: Colors.black87),
+      ),
+    ),
+  );
+}
